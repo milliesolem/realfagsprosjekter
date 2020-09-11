@@ -35,12 +35,12 @@ def test_NetSpringForce(NetSpringForce, PointParticle):
     assert hasattr(A, "m"), "NetSpringForce doesn't have a variable called 'm'"
     assert hasattr(A, "k"), "NetSpringForce doesn't have a variable called 'k'"
     assert hasattr(A, "g"), "NetSpringForce doesn't have a variable called 'g'"
-    assert hasattr(A, "x0"), "NetSpringForce doesn't have a variable called 'x0'"
+    assert hasattr(A, "xb"), "NetSpringForce doesn't have a variable called 'xb'"
     assert hasattr(A, "L"), "NetSpringForce doesn't have a variable called 'L'"
 
     # test default values
     assert A.g == 9.81, "Wrong default value of 'g'"
-    assert A.x0 == 1, "Wrong default value of 'x0'"
+    assert A.xb == 1, "Wrong default value of 'xb'"
     assert A.L == 1, "Wrong default value of 'L'"
 
     # test __call__ output
@@ -53,7 +53,7 @@ def test_NetSpringForce(NetSpringForce, PointParticle):
     assert NetSpringForce(1,1,g=1)(1,1,1) == NetSpringForce(1,1,g=-1)(1,1,1), "the sign of 'g' shouldnt' matter!"
 
     # evaluate a path
-    A = NetSpringForce(m=1, k=100, g=0, x0=1, L=1)
+    A = NetSpringForce(m=1, k=100, g=0, xb=1, L=1)
     particle = PointParticle(mass=A.m)
     particle.simulate_path(A, dt=1e-4, N=1e4, r0=1, v0=0)
     x = np.cos(10*particle.t)
