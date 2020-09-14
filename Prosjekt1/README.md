@@ -5,6 +5,6 @@ Prosjektet er delt inn i 3 deler av økende vanskelighetsgrad.
 ## Del 1
 Del 1 av prosjektet går ut på å modellere en 1-dimensjonal fjær i et gravitasjonsfelt. Modellen er implementert i `spring.py` og realisert i Jupyter Notebook'en `part1.ipynb`.
 ## Del 2
-I del 2 av prosjektet implementerer vi snorkraften til en pendel som en 2-dimensjonal fjær i et gravitasjonsfelt.
+I del 2 av prosjektet implementerer vi snorkraften til en pendel som en 2-dimensjonal fjær i et gravitasjonsfelt. Modellen er implementert i `simple_pendulum.py` og realisert i Jupyter Notebook'en `part2.ipynb`.
 ## Del 3
-Siste del av prosjektet utvider modellen fra del 2 med luftmotstand og en bøyelig fjær.
+Siste del av prosjektet utvider modellen fra del 2 med luftmotstand og en bøyelig fjær. Modellen er implementerti `realistic_pendulum.py` og realisert i Jupyter Notebook'en `part3.ipynb`.
