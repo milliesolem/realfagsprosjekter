@@ -10,7 +10,7 @@ class Particle:
         self.r += self.v*dt
 
     def collide(self,lmin,lmax):
-        self.mask = (lmin<=self.r) | (lmax>=self.r)
+        self.mask = (lmin>=self.r) | (lmax<=self.r)
         self.v[self.mask] *= -1
 
 class Measurement:
@@ -26,7 +26,7 @@ class Box:
         
 
         if lmin is None and lmax is None:
-            self.lmin = np.zeroes(self.dim)
+            self.lmin = np.zeros(self.dim)
             self.lmax = np.ones(self.dim)
         elif lmin is None and lmax is not None:
             self.lmax = np.array(lmax).astype(np.float_)
