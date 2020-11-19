@@ -74,24 +74,9 @@ class Box:
             for m in Measurements:
                 m.measure(self.particles)
         
-    
-        
-        
-
-class CountCollisions (Measurement):
-    def __init__(self):
-        super().__init__(N_collisions = 0)
-    def measure(self, particles):
-        for p in particles:
-            self.properties["N_collisions"]+=np.any(p.mask)
         
 if __name__ == "__main__":
     A = Box(dim = 2,lmax = [-1,-1])
     A.generate_particles(100)
 
-    C = CountCollisions()
-    
-    A.simulate(1e-4, 10000, C)
-
-    print(C.properties)
-        
+    A.simulate(1e-4, 10000)
