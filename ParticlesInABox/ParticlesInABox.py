@@ -23,9 +23,12 @@ class Particle:
         self.r += self.v*dt
 
     def collide(self, Lmin, Lmax):
-        # identify r components "outside" the box
-        self.mask = (Lmin >= self.r) | (Lmax <= self.r)
-        self.v[self.mask] *= -1
+        # identify r components outside the box
+        self.min_mask = Lmin >= self.r
+        self.max_mask = Lmax <= self.r
+
+        # flip velocity sign for components outside the box
+        self.v[self.min_mask | self.max_mask] *= -1
 
 class MeasurementTool:
     """
@@ -47,11 +50,9 @@ class MeasurementTool:
         self.simsetup = dict()
         self.results = dict()
 
-    def setup_process(self, **kwargs):
-        # store all simulation keyword arguments
-        self.simsetup.update(kwargs)
+    def setup_process(self, Box):
+        pass
 
-    # placeholder
     def measure(self, t, particles):
         pass
 
@@ -145,7 +146,7 @@ class ParticleBox:
 
         # prepare measurement tools for data collection
         for M in Measurements:
-            M.setup_process(N_particles=self.N_particles, N_steps=self.N_steps, t=self.t)
+            M.setup_process(self)
 
         # main integration loop
         for t_i in self.t[:-1]:
