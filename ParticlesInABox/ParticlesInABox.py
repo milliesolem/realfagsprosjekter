@@ -30,30 +30,69 @@ class Particle:
         # flip velocity sign for components outside the box
         self.v[self.min_mask | self.max_mask] *= -1
 
-class MeasurementTool:
+class MeasurementDevice:
     """
-    Measurement tool
+    Parent Class: Measurement Device
     -----------------------------------------------------
-    attributes:
-        params   (dict) : measurement parameters
-        simsetup (dict) : simulation parameters
-        results  (dict) : results of the measurement
+    internal attributes
+        device_params (dict) : parameters of measurement device
+        sim_params    (dict) : simulation parameters
+        _measurements (dict) : raw data
+        _results      (dict) : results of the measurement
+        _complete     (bool) : True if measurement is complete
+    
+    property attributes:
+        results (dict)    : access _results dictionary
+        *key*   (keytype) : access element *key* in _results dictionary
     
     methods:
-        __init__      : setup and adjust measurement parameters
-        setup_process : setup measurement process
-        measure       : execute measurement
+        __init__            : initialize device
+        prepare_device      : prepare device for the measurement process
+        finish_measurement  : finish the measurement process
+
+    placeholder methods: (to be defined in child classes)
+        setup_dict          : setup _measurements dictionary
+        measure             : use device to collect raw data
+        compute_results     : compute results and store in _results dictionary
     """
     def __init__(self, **kwargs):
-        # setup dictionaries
-        self.params = kwargs
-        self.simsetup = dict()
-        self.results = dict()
+        # setup internal structure
+        self.device_params = kwargs
+        self.sim_params = dict()
+        self._measurements = dict()
+        self._results = dict()
+        self._complete = False
 
-    def setup_process(self, Box):
+    # extract box and simulation parameters
+    def prepare_measurement(self, Box):
+        params = ["dim", "N_particles", "beta", "mass", "mu", "sigma", "dt", "N_steps", "t"]
+        self.sim_params.update({param : getattr(Box, param) for param in params})
+        self.setup_dict()
+
+    # finish measurement process
+    def finish_measurement(self):
+        self._complete = True
+        self.compute_results()
+    
+    # access results dictionary only if the measurement has been completed
+    @property
+    def results(self):
+        assert self._complete, "No result available as the simulation has not been run yet."
+        return self._results
+    
+    # directly access result elements by key
+    def __getattr__(self, key):
+        if key in self._results:
+            return self.results[key]
+        else:
+            return self.__getattribute__(key)
+    
+    # placeholders
+    def setup_dict(self):
         pass
-
-    def measure(self, t, particles):
+    def measure(self, time, particles):
+        pass
+    def compute_results(self):
         pass
 
 class ParticleBox:
@@ -126,11 +165,11 @@ class ParticleBox:
         # generate initial particle positions and velocities
         R0 = self.Lmin + (self.Lmax - self.Lmin) * np.random.uniform(size=(self.N_particles, self.dim))
         V0 = self.mu + self.sigma * np.random.randn(self.N_particles, self.dim)
-
+        
         # generate particles
         self.particles = [Particle(r0, v0) for r0,v0 in zip(R0,V0)]
 
-    def simulate(self,  dt, N, *Measurements, a=0, t0=0):
+    def simulate(self,  dt, N, *MDevices, a=0, t0=0):
         # setup simulation parameters
         self.dt = float(dt)
         self.N_steps = int(N)
@@ -144,9 +183,9 @@ class ParticleBox:
         self.t = self.t0 + self.dt * np.linspace(0, self.N_steps, self.N_steps + 1)
         A = a if callable(a) else lambda t: a
 
-        # prepare measurement tools for data collection
-        for M in Measurements:
-            M.setup_process(self)
+        # prepare measurement devices for data collection
+        for M in MDevices:
+            M.prepare_measurement(self)
 
         # main integration loop
         for t_i in self.t[:-1]:
@@ -160,12 +199,17 @@ class ParticleBox:
                 p.collide(self.Lmin, self.Lmax)
             
             # data collection
-            for M in Measurements:
+            for M in MDevices:
                 M.measure(t_i, self.particles)
         
+        # compute the results of the measurements
+        for M in MDevices:
+            M.finish_measurement()
         
 if __name__ == "__main__":
     A = ParticleBox(dim = 2, Lmax = [-1,-1])
     A.generate_particles(100)
 
-    A.simulate(1e-4, 10000)
+    EmptyDevice = MeasurementDevice()
+
+    A.simulate(1e-4, 1e3, EmptyDevice)
